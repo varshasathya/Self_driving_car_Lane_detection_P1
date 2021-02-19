@@ -10,47 +10,54 @@ When we drive, we use our eyes to decide where to go.  The lines on the road tha
 
 In this project you will detect lane lines in images using Python and OpenCV.  OpenCV means "Open-Source Computer Vision", which is a package that has many useful tools for analyzing images.  
 
-To complete the project, two files will be submitted: a file containing project code and a file containing a brief write up explaining your solution. We have included template files to be used both for the [code](https://github.com/udacity/CarND-LaneLines-P1/blob/master/P1.ipynb) and the [writeup](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md).The code file is called P1.ipynb and the writeup template is writeup_template.md 
 
-To meet specifications in the project, take a look at the requirements in the [project rubric](https://review.udacity.com/#!/rubrics/322/view)
+**Finding Lane Lines on the Road**
 
-
-Creating a Great Writeup
----
-For this project, a great writeup should provide a detailed response to the "Reflection" section of the [project rubric](https://review.udacity.com/#!/rubrics/322/view). There are three parts to the reflection:
-
-1. Describe the pipeline
-
-2. Identify any shortcomings
-
-3. Suggest possible improvements
-
-We encourage using images in your writeup to demonstrate how your pipeline works.  
-
-All that said, please be concise!  We're not looking for you to write a book here: just a brief description.
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup. Here is a link to a [writeup template file](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md). 
+The goals / steps of this project are the following:
+* Make a pipeline that finds lane lines on the road
+* Reflect on your work in a written report
 
 
-The Project
+[//]: # (Image References)
+
+[image1]: ./intermittent_images/greyscale_solidwhite_right.jpg "Grayscale"
+[image2]: ./intermittent_images/blur_solidwhite_right_image.jpg "Blurred"
+[image3]: ./intermittent_images/canny_solidwhite_right_image.jpg "Canny"
+[image4]: ./intermittent_images/masked_solidwhite_right_image.jpg "Masked"
+[image5]: ./test_images_output/solidWhiteRightoutput.png  "Weighted"
+
 ---
 
-## If you have already installed the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) you should be good to go!   If not, you should install the starter kit to get started on this project. ##
+### Reflection
 
-**Step 1:** Set up the [CarND Term1 Starter Kit](https://classroom.udacity.com/nanodegrees/nd013/parts/fbf77062-5703-404e-b60c-95b78b2f3f9e/modules/83ec35ee-1e02-48a5-bdb7-d244bd47c2dc/lessons/8c82408b-a217-4d09-b81d-1bda4c6380ef/concepts/4f1870e0-3849-43e4-b670-12e6f2d4b7a7) if you haven't already.
+My pipeline consisted of 5 steps. 
+1. I converted the image to greyscale.
+![alt text][image1]
+2. Applied guassian blur to smoothen the edges.
+![alt text][image2]
+3. Applied canny edge dectection functionality on smoothened image.
+![alt text][image3]
+4. Applied pollyfit region of interest and discarded all the other lines outside this region of interest.
+![alt text][image4]
+5. Applied Hough Transform to detect lanes within the region of interest and two smooth red lines are drawn by interpolating the seperate lanes.
+![alt text][image5]
 
-**Step 2:** Open the code in a Jupyter Notebook
+In order to draw a single line on the left and right lanes, I added two new funtions called draw_each_line() and draw_both_lane_lines().
 
-You will complete the project code in a Jupyter notebook.  If you are unfamiliar with Jupyter Notebooks, check out <A HREF="https://www.packtpub.com/books/content/basics-jupyter-notebook-and-python" target="_blank">Cyrille Rossant's Basics of Jupyter Notebook and Python</A> to get started.
+To create two solid lines instead of segmented lines, I first seperate left lane lines from right lane lines using the condition where left lane line will be negative. Later I'm interpolating the points by minimizing distance between these points using stats.linregress(x,y) from which we obtain slope and intercept of the lane as this helps us to reduce least square errors. 
 
-Jupyter is an Ipython notebook where you can run blocks of code and see results interactively.  All the code for this project is contained in a Jupyter notebook. To start Jupyter in your browser, use terminal to navigate to your project directory and then run the following command at the terminal prompt (be sure you've activated your Python 3 carnd-term1 environment as described in the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) installation instructions!):
+At first solidYellowLeft.mp4 was showing distorted line at the right line of the lane. Later I discarded lines with smaller slopes as they might be forming horizontal lines thus obtaining smooth lines at both sides of the lanes without any distortion.
 
-`> jupyter notebook`
+### 2. Identify potential shortcomings with your current pipeline
 
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
 
-**Step 3:** Complete the project and submit both the Ipython notebook and the project writeup
+One potential shortcoming would be that the hyperparameters are hard coded including the vertices for the polygon as it is assumed that camera position, angles are fixed and the road/lane is flat. So this method may not work on advance scenerios where there may be uphill/downhill or any other obstacles/vechicles in the way of our car.
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+Another shortcoming could be that straight lines doesn't work well on curved lanes.
 
+
+### 3. Suggest possible improvements to your pipeline
+
+A possible improvement would be to use higher order polynomial without using more computational resources.
+
+Another potential improvement could be to use deep learning model in order to find lanes thus eliminating hard coded parameters. This approach may also be improvised to detect lanes under various scenerios without fixed assumptions.
